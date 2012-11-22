@@ -24,14 +24,14 @@ import net.floodlightcontroller.packet.Ethernet;
 import net.floodlightcontroller.packet.IPv4;
 import net.floodlightcontroller.staticflowentry.IStaticFlowEntryPusherService;
 
-public class PacketInspector implements IOFMessageListener, IFloodlightModule {
+public class ProtocolClassifier implements IOFMessageListener, IFloodlightModule {
 	public final int DEFAULT_CACHE_SIZE = 10;
 	protected IFloodlightProviderService floodlightProvider;
 	private IStaticFlowEntryPusherService flowPusher;
 
 	@Override
 	public String getName() {
-		return "Names";
+		return "PrototolClassifier";
 	}
 
 	@Override

@@ -25,3 +25,4 @@ net.floodlightcontroller.core.test.MockFloodlightProvider
 net.floodlightcontroller.core.test.MockThreadPoolService
 net.floodlightcontroller.firewall.Firewall
 net.floodlightcontroller.statcollector.StatCollector
+net.floodlightcontroller.statcollector.ProtocolClassifier
