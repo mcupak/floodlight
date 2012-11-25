@@ -8,14 +8,19 @@ package net.floodlightcontroller.statcollector;
  */
 public class LinkStat {
 
-	private String srcSwitch;
-	private String dstSwitch;
-	private Integer srcPort;
-	private Integer dstPort;
-	private Double bandwidth;
-	private Long period;
+	private String srcSwitch = "";
+	private String dstSwitch = "";
+	private Integer srcPort = 0;
+	private Integer dstPort = 0;
+	private Double bandwidth = new Double(0);
+	private Long period = new Long(0);
 
 	public LinkStat() {
+	}
+
+	public String getId() {
+		return getSrcSwitch() + "/" + getSrcPort() + "-" + getDstSwitch() + "/"
+				+ getDstPort();
 	}
 
 	public Double getBandwidth() {

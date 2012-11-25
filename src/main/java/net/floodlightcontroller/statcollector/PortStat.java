@@ -7,14 +7,18 @@ package net.floodlightcontroller.statcollector;
  * 
  */
 public class PortStat {
-	private String switchId;
-	private Integer portNumber;
-	private Long receiveBytes;
-	private Long transmitBytes;
-	private Double bandwidth;
-	private Long period;
+	private String switchId = "";
+	private Integer portNumber = 0;
+	private Long receiveBytes = new Long(0);
+	private Long transmitBytes = new Long(0);
+	private Double bandwidth = new Double(0);
+	private Long period = new Long(0);
 
 	public PortStat() {
+	}
+
+	public String getId() {
+		return switchId + "/" + portNumber;
 	}
 
 	public Double getBandwidth() {

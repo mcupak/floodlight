@@ -73,8 +73,7 @@ public class StatDeserializer {
 							.getValueAsLong());
 					currentStat.setTransmitBytes(port.get("transmitBytes")
 							.getValueAsLong());
-					stats.put(swId + "/" + currentStat.getPortNumber(),
-							currentStat);
+					stats.put(currentStat.getId(), currentStat);
 				}
 			}
 		} catch (JsonProcessingException e) {
@@ -88,8 +87,8 @@ public class StatDeserializer {
 		return stats;
 	}
 
-	public Set<LinkStat> getLinkStats() {
-		Set<LinkStat> stats = new HashSet<LinkStat>();
+	public Map<String, LinkStat> getLinkStats() {
+		Map<String, LinkStat> stats = new HashMap<String, LinkStat>();
 		ObjectMapper m = new ObjectMapper();
 		try {
 			JsonNode root = m.readTree(new BufferedReader(
@@ -102,7 +101,7 @@ public class StatDeserializer {
 				currentStat.setDstSwitch(link.get("dst-switch")
 						.getValueAsText());
 				currentStat.setDstPort(link.get("dst-port").getValueAsInt());
-				stats.add(currentStat);
+				stats.put(currentStat.getId(), currentStat);
 			}
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block

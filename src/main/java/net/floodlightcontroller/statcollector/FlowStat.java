@@ -7,17 +7,17 @@ package net.floodlightcontroller.statcollector;
  * 
  */
 public class FlowStat {
-	private String switchId;
-	private String actions;
-	private Integer priority;
-	private Integer idleTimeout;
-	private Integer hardTimeout;
-	private Double duration;
-	private Integer packetCount;
-	private Integer byteCount;
-	private String match;
-	private Integer tableId;
-	private Double bandwidth;
+	private String switchId = "";
+	private String actions = "";
+	private Integer priority = 0;
+	private Integer idleTimeout = 0;
+	private Integer hardTimeout = 0;
+	private Double duration = new Double(0);
+	private Integer packetCount = 0;
+	private Integer byteCount = 0;
+	private String match = "";
+	private Integer tableId = 0;
+	private Double bandwidth = new Double(0);
 
 	public FlowStat() {
 	}

@@ -39,10 +39,10 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	private Timer statTimer;
 	// link bandwidth
 	private long lastTimeLinkStat;
-	private volatile Set<LinkStat> linkStats;
+	private volatile Map<String, LinkStat> linkStats;
 	// port bandwidth
 	private long lastTimePortStat;
-	private volatile Set<PortStat> portStats;
+	private volatile Map<String, PortStat> portStats;
 	// flow bandwidth
 	private volatile Set<FlowStat> flowStats;
 
@@ -56,30 +56,45 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 
 		@Override
 		public void run() {
-			Set<LinkStat> links = deserializer.getLinkStats();
+			Map<String, LinkStat> links = deserializer.getLinkStats();
 			Map<String, PortStat> ports = deserializer.getPortStats();
 			long now = System.currentTimeMillis();
 			long period = now - lastTimeLinkStat;
 			lastTimeLinkStat = now;
 
-			for (LinkStat s : links) {
+			for (LinkStat s : links.values()) {
 				s.setPeriod(period);
+				// get byte difference
 				PortStat port1 = ports.get(s.getSrcSwitch() + "/"
 						+ s.getSrcPort());
+				if (port1 == null)
+					port1 = new PortStat();
 				PortStat port2 = ports.get(s.getDstSwitch() + "/"
 						+ s.getDstPort());
+				if (port2 == null)
+					port2 = new PortStat();
+
+				PortStat pPort1 = portStats.get(s.getSrcSwitch() + "/"
+						+ s.getSrcPort());
+				if (pPort1 == null)
+					pPort1 = new PortStat();
+				PortStat pPort2 = portStats.get(s.getDstSwitch() + "/"
+						+ s.getDstPort());
+				if (pPort2 == null)
+					pPort2 = new PortStat();
+				
+				Long byteDiff = (port1.getReceiveBytes()
+						+ port1.getTransmitBytes() + port2.getReceiveBytes()
+						+ port2.getTransmitBytes() - pPort1.getReceiveBytes()
+						- pPort1.getTransmitBytes() - pPort2.getReceiveBytes() - pPort2
+						.getTransmitBytes()) / 2;
 				// set bandwidth to the average of the two ports, they should
 				// have roughly the same value
-				s.setBandwidth((port1.getReceiveBytes().doubleValue()
-						+ port1.getTransmitBytes().doubleValue()
-						+ port2.getReceiveBytes().doubleValue() + port2
-						.getTransmitBytes().doubleValue())
-						/ (2 * period / 1000));
+				s.setBandwidth(byteDiff.doubleValue() / (period / 1000));
 			}
 
 			linkStats = links;
 		}
-
 	}
 
 	/**
@@ -93,17 +108,24 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 		@Override
 		public void run() {
 			Map<String, PortStat> ports = deserializer.getPortStats();
+			// measure time since last measurement - executed repeatedly just to
+			// be precise
 			long now = System.currentTimeMillis();
 			long period = now - lastTimePortStat;
 			lastTimePortStat = now;
 
 			for (PortStat s : ports.values()) {
 				s.setPeriod(period);
-				s.setBandwidth((s.getReceiveBytes().doubleValue() + s
-						.getTransmitBytes().doubleValue()) / (period / 1000));
+				// get byte difference
+				PortStat previous = portStats.get(s.getId());
+				if (previous == null)
+					previous = new PortStat();
+				Long byteDiff = (s.getReceiveBytes() + s.getTransmitBytes() - (previous
+						.getReceiveBytes() + previous.getTransmitBytes()));
+				s.setBandwidth(byteDiff.doubleValue() / (period / 1000));
 			}
 
-			portStats = new HashSet<PortStat>(ports.values());
+			portStats = ports;
 		}
 
 	}
@@ -192,6 +214,10 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 		floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
 		restApi.addRestletRoutable(new StatWebRoutable());
 
+		linkStats = new HashMap<String, LinkStat>();
+		portStats = new HashMap<String, PortStat>();
+		flowStats = new HashSet<FlowStat>();
+
 		statTimer = new Timer();
 		// link bandwidth
 		lastTimeLinkStat = System.currentTimeMillis();
@@ -207,11 +233,11 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	}
 
 	public Set<LinkStat> getLinkStats() {
-		return linkStats;
+		return new HashSet<LinkStat>(linkStats.values());
 	}
 
 	public Set<PortStat> getPortStats() {
-		return portStats;
+		return new HashSet<PortStat>(portStats.values());
 	}
 
 	public Set<FlowStat> getFlowStats() {
