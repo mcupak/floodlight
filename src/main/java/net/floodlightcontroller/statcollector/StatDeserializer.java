@@ -73,7 +73,7 @@ public class StatDeserializer {
 							.getValueAsLong());
 					currentStat.setTransmitBytes(port.get("transmitBytes")
 							.getValueAsLong());
-					stats.put(currentStat.getId(), currentStat);
+					stats.put(currentStat.computeId(), currentStat);
 				}
 			}
 		} catch (JsonProcessingException e) {
@@ -101,7 +101,7 @@ public class StatDeserializer {
 				currentStat.setDstSwitch(link.get("dst-switch")
 						.getValueAsText());
 				currentStat.setDstPort(link.get("dst-port").getValueAsInt());
-				stats.put(currentStat.getId(), currentStat);
+				stats.put(currentStat.computeId(), currentStat);
 			}
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block

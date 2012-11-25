@@ -17,7 +17,7 @@ public class PortStat {
 	public PortStat() {
 	}
 
-	public String getId() {
+	public String computeId() {
 		return switchId + "/" + portNumber;
 	}
 

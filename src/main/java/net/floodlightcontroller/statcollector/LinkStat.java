@@ -18,7 +18,7 @@ public class LinkStat {
 	public LinkStat() {
 	}
 
-	public String getId() {
+	public String computeId() {
 		return getSrcSwitch() + "/" + getSrcPort() + "-" + getDstSwitch() + "/"
 				+ getDstPort();
 	}

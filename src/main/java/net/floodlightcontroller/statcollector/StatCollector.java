@@ -82,7 +82,7 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 						+ s.getDstPort());
 				if (pPort2 == null)
 					pPort2 = new PortStat();
-				
+
 				Long byteDiff = (port1.getReceiveBytes()
 						+ port1.getTransmitBytes() + port2.getReceiveBytes()
 						+ port2.getTransmitBytes() - pPort1.getReceiveBytes()
@@ -117,7 +117,7 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 			for (PortStat s : ports.values()) {
 				s.setPeriod(period);
 				// get byte difference
-				PortStat previous = portStats.get(s.getId());
+				PortStat previous = portStats.get(s.computeId());
 				if (previous == null)
 					previous = new PortStat();
 				Long byteDiff = (s.getReceiveBytes() + s.getTransmitBytes() - (previous
@@ -206,13 +206,13 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 		floodlightProvider = context
 				.getServiceImpl(IFloodlightProviderService.class);
 		restApi = context.getServiceImpl(IRestApiService.class);
-		deserializer = StatDeserializer.getInstance();
 	}
 
 	@Override
 	public void startUp(FloodlightModuleContext context) {
 		floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
 		restApi.addRestletRoutable(new StatWebRoutable());
+		deserializer = StatDeserializer.getInstance();
 
 		linkStats = new HashMap<String, LinkStat>();
 		portStats = new HashMap<String, PortStat>();
