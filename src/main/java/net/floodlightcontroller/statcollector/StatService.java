@@ -8,4 +8,5 @@ import net.floodlightcontroller.core.types.SwitchMessagePair;
 public interface StatService extends IFloodlightService {
 
 	Set<LinkStat> getLinkStats();
+	Set<PortStat> getPortStats();
 }

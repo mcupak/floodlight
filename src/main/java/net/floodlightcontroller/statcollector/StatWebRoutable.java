@@ -10,7 +10,8 @@ public class StatWebRoutable implements RestletRoutable {
     @Override
     public Restlet getRestlet(Context context) {
         Router router = new Router(context);
-        router.attach(Constants.LINK_BANDWIDTH, StatResource.class);
+        router.attach(Constants.LINK_BANDWIDTH, LinkBandwidthResource.class);
+        router.attach(Constants.PORT_BANDWIDTH, PortBandwidthResource.class);
         return router;
     }
 

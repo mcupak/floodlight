@@ -89,31 +89,22 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 
 		@Override
 		public void run() {
-			Set<LinkStat> links = deserializer.getLinkStats();
 			Map<String, PortStat> ports = deserializer.getPortStats();
 			long now = System.currentTimeMillis();
-			long period = now - lastTimeLinkStat;
-			lastTimeLinkStat = now;
+			long period = now - lastTimePortStat;
+			lastTimePortStat = now;
 
-			for (LinkStat s : links) {
+			for (PortStat s : ports.values()) {
 				s.setPeriod(period);
-				PortStat port1 = ports.get(s.getSrcSwitch() + "/"
-						+ s.getSrcPort());
-				PortStat port2 = ports.get(s.getDstSwitch() + "/"
-						+ s.getDstPort());
-				// set bandwidth to the average of the two ports, they should
-				// have roughly the same value
-				s.setBandwidth((port1.getReceiveBytes().doubleValue()
-						+ port1.getTransmitBytes().doubleValue()
-						+ port2.getReceiveBytes().doubleValue() + port2
-						.getTransmitBytes().doubleValue()) / (2 * period));
+				s.setBandwidth((s.getReceiveBytes().doubleValue() + s
+						.getTransmitBytes().doubleValue()) / period);
 			}
 
-			linkStats = links;
+			portStats = new HashSet<PortStat>(ports.values());
 		}
 
 	}
-	
+
 	@Override
 	public String getName() {
 		return "StatCollector";
@@ -180,13 +171,20 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 		statTimer = new Timer();
 		// link bandwidth
 		lastTimeLinkStat = System.currentTimeMillis();
-		statTimer.schedule(new LinkStatTask(), 0, Constants.STAT_COLLECTION_INTERVAL);
+		statTimer.schedule(new LinkStatTask(), 0,
+				Constants.STAT_COLLECTION_INTERVAL);
 		// port bandwidth
 		lastTimePortStat = System.currentTimeMillis();
-		statTimer.schedule(new PortStatTask(), 100, Constants.STAT_COLLECTION_INTERVAL);
+		statTimer.schedule(new PortStatTask(), 100,
+				Constants.STAT_COLLECTION_INTERVAL);
 	}
 
 	public Set<LinkStat> getLinkStats() {
 		return linkStats;
 	}
+
+	public Set<PortStat> getPortStats() {
+		return portStats;
+	}
+
 }
