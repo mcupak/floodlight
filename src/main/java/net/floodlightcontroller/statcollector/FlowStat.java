@@ -116,18 +116,10 @@ public class FlowStat {
 		int result = 1;
 		result = prime * result + ((actions == null) ? 0 : actions.hashCode());
 		result = prime * result
-				+ ((bandwidth == null) ? 0 : bandwidth.hashCode());
-		result = prime * result
-				+ ((byteCount == null) ? 0 : byteCount.hashCode());
-		result = prime * result
-				+ ((duration == null) ? 0 : duration.hashCode());
-		result = prime * result
 				+ ((hardTimeout == null) ? 0 : hardTimeout.hashCode());
 		result = prime * result
 				+ ((idleTimeout == null) ? 0 : idleTimeout.hashCode());
 		result = prime * result + ((match == null) ? 0 : match.hashCode());
-		result = prime * result
-				+ ((packetCount == null) ? 0 : packetCount.hashCode());
 		result = prime * result
 				+ ((priority == null) ? 0 : priority.hashCode());
 		result = prime * result
@@ -150,21 +142,6 @@ public class FlowStat {
 				return false;
 		} else if (!actions.equals(other.actions))
 			return false;
-		if (bandwidth == null) {
-			if (other.bandwidth != null)
-				return false;
-		} else if (!bandwidth.equals(other.bandwidth))
-			return false;
-		if (byteCount == null) {
-			if (other.byteCount != null)
-				return false;
-		} else if (!byteCount.equals(other.byteCount))
-			return false;
-		if (duration == null) {
-			if (other.duration != null)
-				return false;
-		} else if (!duration.equals(other.duration))
-			return false;
 		if (hardTimeout == null) {
 			if (other.hardTimeout != null)
 				return false;
@@ -179,11 +156,6 @@ public class FlowStat {
 			if (other.match != null)
 				return false;
 		} else if (!match.equals(other.match))
-			return false;
-		if (packetCount == null) {
-			if (other.packetCount != null)
-				return false;
-		} else if (!packetCount.equals(other.packetCount))
 			return false;
 		if (priority == null) {
 			if (other.priority != null)

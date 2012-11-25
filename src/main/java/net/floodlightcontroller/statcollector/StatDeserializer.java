@@ -139,6 +139,8 @@ public class StatDeserializer {
 					currentStat.setTableId(item.get("tableId").getValueAsInt());
 					currentStat.setByteCount(item.get("byteCount")
 							.getValueAsInt());
+					currentStat.setPacketCount(item.get("packetCount")
+							.getValueAsInt());
 
 					// set duration in ms
 					currentStat.setDuration(item.get("durationSeconds")
