@@ -10,12 +10,12 @@ public class StatWebRoutable implements RestletRoutable {
     @Override
     public Restlet getRestlet(Context context) {
         Router router = new Router(context);
-        router.attach("/throughput/json", StatResource.class);
+        router.attach(Constants.LINK_BANDWIDTH, StatResource.class);
         return router;
     }
 
     @Override
     public String basePath() {
-        return "/wm/stat";
+        return Constants.URL_BASE;
     }
 }

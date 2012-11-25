@@ -24,6 +24,12 @@ import net.floodlightcontroller.packet.Ethernet;
 import net.floodlightcontroller.packet.IPv4;
 import net.floodlightcontroller.staticflowentry.IStaticFlowEntryPusherService;
 
+/**
+ * Module for clasification of packets based on the protocol.
+ * 
+ * @author mcupak
+ *
+ */
 public class ProtocolClassifier implements IOFMessageListener, IFloodlightModule {
 	public final int DEFAULT_CACHE_SIZE = 10;
 	protected IFloodlightProviderService floodlightProvider;
@@ -47,23 +53,23 @@ public class ProtocolClassifier implements IOFMessageListener, IFloodlightModule
 	// This is where we pull fields from the packet-in
 	@Override
 	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
-		BasePacket pkt = (BasePacket) IFloodlightProviderService.bcStore.get(
-				cntx, IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
-		// Instantiate two objects for OFMatch and OFPacketIn
-		OFPacketIn pin = (OFPacketIn) msg;
-		OFMatch match = new OFMatch();
-		match.loadFromPacket(pin.getPacketData(), pin.getInPort());
-		// Destination IP Address for each packet-in
-		System.out.println("$$$$$-Get the Desitnation IP Address-$$$$$");
-		System.out.println(IPv4.fromIPv4Address(match.getNetworkDestination()));
-		// Source Mac Address for each packet-in
-		System.out.println("$$$$$-Mac Address Destination-$$$$$$");
-		Long sourceMACHash = Ethernet.toLong(match.getDataLayerDestination());
-		System.out.println(HexString.toHexString(sourceMACHash));
-		// Here we print the entire packet-in array which has all matchable
-		// fields
-		System.out.println("$$$$$-PacketIn ARRAY-$$$$$");
-		System.out.println(Arrays.asList(match));
+//		BasePacket pkt = (BasePacket) IFloodlightProviderService.bcStore.get(
+//				cntx, IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
+//		// Instantiate two objects for OFMatch and OFPacketIn
+//		OFPacketIn pin = (OFPacketIn) msg;
+//		OFMatch match = new OFMatch();
+//		match.loadFromPacket(pin.getPacketData(), pin.getInPort());
+//		// Destination IP Address for each packet-in
+//		System.out.println("$$$$$-Get the Desitnation IP Address-$$$$$");
+//		System.out.println(IPv4.fromIPv4Address(match.getNetworkDestination()));
+//		// Source Mac Address for each packet-in
+//		System.out.println("$$$$$-Mac Address Destination-$$$$$$");
+//		Long sourceMACHash = Ethernet.toLong(match.getDataLayerDestination());
+//		System.out.println(HexString.toHexString(sourceMACHash));
+//		// Here we print the entire packet-in array which has all matchable
+//		// fields
+//		System.out.println("$$$$$-PacketIn ARRAY-$$$$$");
+//		System.out.println(Arrays.asList(match));
 
 		return Command.CONTINUE;
 	}

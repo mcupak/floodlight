@@ -2,6 +2,7 @@ package net.floodlightcontroller.statcollector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import net.floodlightcontroller.core.types.SwitchMessagePair;
 
@@ -10,10 +11,8 @@ import org.restlet.resource.ServerResource;
 
 public class StatResource extends ServerResource {
     @Get("json")
-    public List<SwitchMessagePair> retrieve() {
-        StatService pihr = (StatService)getContext().getAttributes().get(StatService.class.getCanonicalName());
-        List<SwitchMessagePair> l = new ArrayList<SwitchMessagePair>();
-        l.addAll(java.util.Arrays.asList(pihr.getBuffer().snapshot()));
-        return l;
+    public Set<LinkStat> retrieve() {
+        StatService s = (StatService)getContext().getAttributes().get(StatService.class.getCanonicalName());
+        return s.getLinkStats();
     }
 }

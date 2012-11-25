@@ -8,12 +8,22 @@ package net.floodlightcontroller.statcollector;
  */
 public final class Constants {
 
-	/**
+	/*
 	 * URL constants.
 	 */
 	public static final String URL_PROTOCOL = "http://";
 	public static final String URL_IP = "localhost";
 	public static final String URL_PORT = ":8080";
-	public static final String URL_BASE = "/wm/statistics";
-	
+	/*
+	 * Output stats.
+	 */
+	public static final String URL_BASE = "/wm/stat";
+	public static final String LINK_BANDWIDTH = "/link/json";
+	public static final int STAT_COLLECTION_INTERVAL = 5000;
+	/*
+	 * Input stats.
+	 */
+	public static final String URL_LINKS = "/wm/topology/links/json";
+	public static final String URL_PORTS = "/wm/core/switch/all/port/json";
+
 }
