@@ -29,6 +29,7 @@ public class StatDeserializer {
 	private static StatDeserializer instance = null;
 	private URL linkStat;
 	private URL portStat;
+	private URL flowStat;
 
 	protected StatDeserializer() {
 		try {
@@ -36,6 +37,8 @@ public class StatDeserializer {
 					+ Constants.URL_PORT + Constants.URL_LINKS);
 			portStat = new URL(Constants.URL_PROTOCOL + Constants.URL_IP
 					+ Constants.URL_PORT + Constants.URL_PORTS);
+			flowStat = new URL(Constants.URL_PROTOCOL + Constants.URL_IP
+					+ Constants.URL_PORT + Constants.URL_FLOWS);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -100,6 +103,51 @@ public class StatDeserializer {
 						.getValueAsText());
 				currentStat.setDstPort(link.get("dst-port").getValueAsInt());
 				stats.add(currentStat);
+			}
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return stats;
+	}
+
+	public Set<FlowStat> getFlowStats() {
+		Set<FlowStat> stats = new HashSet<FlowStat>();
+		ObjectMapper m = new ObjectMapper();
+		try {
+			JsonNode root = m.readTree(new BufferedReader(
+					new InputStreamReader(flowStat.openStream())));
+			Iterator<String> it = root.getFieldNames();
+			String swId;
+			for (JsonNode sw : root) {
+				swId = it.next();
+				for (JsonNode item : sw) {
+					FlowStat currentStat = new FlowStat();
+					currentStat.setSwitchId(swId);
+					currentStat.setActions(item.get("actions").toString());
+					currentStat.setPriority(item.get("priority")
+							.getValueAsInt());
+					currentStat.setIdleTimeout(item.get("idleTimeout")
+							.getValueAsInt());
+					currentStat.setHardTimeout(item.get("hardTimeout")
+							.getValueAsInt());
+					currentStat.setMatch(item.get("match").toString());
+					currentStat.setTableId(item.get("tableId").getValueAsInt());
+					currentStat.setByteCount(item.get("byteCount")
+							.getValueAsInt());
+
+					// set duration in ms
+					currentStat.setDuration(item.get("durationSeconds")
+							.getValueAsDouble()
+							* 1000
+							+ item.get("durationNanoseconds")
+									.getValueAsDouble() / 1000000);
+					stats.add(currentStat);
+				}
 			}
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block

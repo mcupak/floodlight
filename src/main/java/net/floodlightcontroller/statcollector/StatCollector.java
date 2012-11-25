@@ -43,6 +43,8 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	// port bandwidth
 	private long lastTimePortStat;
 	private volatile Set<PortStat> portStats;
+	// flow bandwidth
+	private volatile Set<FlowStat> flowStats;
 
 	/**
 	 * Inner clas performing link bandwidth measurements.
@@ -71,7 +73,8 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 				s.setBandwidth((port1.getReceiveBytes().doubleValue()
 						+ port1.getTransmitBytes().doubleValue()
 						+ port2.getReceiveBytes().doubleValue() + port2
-						.getTransmitBytes().doubleValue()) / (2 * period));
+						.getTransmitBytes().doubleValue())
+						/ (2 * period / 1000));
 			}
 
 			linkStats = links;
@@ -97,12 +100,33 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 			for (PortStat s : ports.values()) {
 				s.setPeriod(period);
 				s.setBandwidth((s.getReceiveBytes().doubleValue() + s
-						.getTransmitBytes().doubleValue()) / period);
+						.getTransmitBytes().doubleValue()) / (period / 1000));
 			}
 
 			portStats = new HashSet<PortStat>(ports.values());
 		}
 
+	}
+
+	/**
+	 * Inner clas performing flow bandwidth measurements.
+	 * 
+	 * @author mcupak
+	 * 
+	 */
+	class FlowStatTask extends TimerTask {
+
+		@Override
+		public void run() {
+			Set<FlowStat> flows = deserializer.getFlowStats();
+
+			for (FlowStat s : flows) {
+				// bytes per socond
+				s.setBandwidth(s.getByteCount() / (s.getDuration() / 1000));
+			}
+
+			flowStats = flows;
+		}
 	}
 
 	@Override
@@ -177,6 +201,9 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 		lastTimePortStat = System.currentTimeMillis();
 		statTimer.schedule(new PortStatTask(), 100,
 				Constants.STAT_COLLECTION_INTERVAL);
+		// flow bandwidth
+		statTimer.schedule(new FlowStatTask(), 200,
+				Constants.STAT_COLLECTION_INTERVAL);
 	}
 
 	public Set<LinkStat> getLinkStats() {
@@ -185,6 +212,10 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 
 	public Set<PortStat> getPortStats() {
 		return portStats;
+	}
+
+	public Set<FlowStat> getFlowStats() {
+		return flowStats;
 	}
 
 }

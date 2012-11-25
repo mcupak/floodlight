@@ -9,4 +9,5 @@ public interface StatService extends IFloodlightService {
 
 	Set<LinkStat> getLinkStats();
 	Set<PortStat> getPortStats();
+	Set<FlowStat> getFlowStats();
 }
