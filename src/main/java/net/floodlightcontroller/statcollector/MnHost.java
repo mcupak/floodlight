@@ -1,4 +1,4 @@
-package net.floodlightcontroller.statCollector;
+package net.floodlightcontroller.statcollector;
 
 
 public class MnHost 
