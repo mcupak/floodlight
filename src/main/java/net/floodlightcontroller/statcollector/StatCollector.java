@@ -23,7 +23,7 @@ import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFType;
 
 /**
- * Collector of throughput/bandwidth/link-related stats.
+ * Collector of throughput/bandwidth/load-related stats.
  * 
  * @author mcupak
  * 
