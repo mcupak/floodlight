@@ -9,9 +9,6 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.openflow.protocol.OFMessage;
-import org.openflow.protocol.OFType;
-
 import net.floodlightcontroller.core.FloodlightContext;
 import net.floodlightcontroller.core.IFloodlightProviderService;
 import net.floodlightcontroller.core.IOFMessageListener;
@@ -20,8 +17,10 @@ import net.floodlightcontroller.core.module.FloodlightModuleContext;
 import net.floodlightcontroller.core.module.FloodlightModuleException;
 import net.floodlightcontroller.core.module.IFloodlightModule;
 import net.floodlightcontroller.core.module.IFloodlightService;
-import net.floodlightcontroller.core.types.SwitchMessagePair;
 import net.floodlightcontroller.restserver.IRestApiService;
+
+import org.openflow.protocol.OFMessage;
+import org.openflow.protocol.OFType;
 
 /**
  * Collector of throughput/bandwidth/link-related stats.
@@ -45,6 +44,9 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	private volatile Map<String, PortStat> portStats;
 	// flow bandwidth
 	private volatile Set<FlowStat> flowStats;
+	// switch load
+	private long lastTimeSwitchStat;
+	private volatile Map<String, SwitchStat> switchStats;
 
 	/**
 	 * Inner clas performing link bandwidth measurements.
@@ -59,7 +61,7 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 			Map<String, LinkStat> links = deserializer.getLinkStats();
 			Map<String, PortStat> ports = deserializer.getPortStats();
 			long now = System.currentTimeMillis();
-			long period = now - lastTimeLinkStat;
+			Long period = new Long(now - lastTimeLinkStat);
 			lastTimeLinkStat = now;
 
 			for (LinkStat s : links.values()) {
@@ -90,7 +92,8 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 						.getTransmitBytes()) / 2;
 				// set bandwidth to the average of the two ports, they should
 				// have roughly the same value
-				s.setBandwidth(byteDiff.doubleValue() / (period / 1000));
+				s.setBandwidth(byteDiff.doubleValue()
+						/ (period.doubleValue() / 1000));
 			}
 
 			linkStats = links;
@@ -111,7 +114,7 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 			// measure time since last measurement - executed repeatedly just to
 			// be precise
 			long now = System.currentTimeMillis();
-			long period = now - lastTimePortStat;
+			Long period = new Long(now - lastTimePortStat);
 			lastTimePortStat = now;
 
 			for (PortStat s : ports.values()) {
@@ -122,7 +125,8 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 					previous = new PortStat();
 				Long byteDiff = (s.getReceiveBytes() + s.getTransmitBytes() - (previous
 						.getReceiveBytes() + previous.getTransmitBytes()));
-				s.setBandwidth(byteDiff.doubleValue() / (period / 1000));
+				s.setBandwidth(byteDiff.doubleValue()
+						/ (period.doubleValue() / 1000));
 			}
 
 			portStats = ports;
@@ -151,6 +155,63 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 		}
 	}
 
+	/**
+	 * Inner clas performing switch load measurements.
+	 * 
+	 * @author mcupak
+	 * 
+	 */
+	class SwitchStatTask extends TimerTask {
+
+		@Override
+		public void run() {
+			Map<String, PortStat> ports = deserializer.getPortStats();
+			// measure time since last measurement - executed repeatedly just to
+			// be precise
+			long now = System.currentTimeMillis();
+			Long period = new Long(now - lastTimeSwitchStat);
+			lastTimeSwitchStat = now;
+
+			Map<String, SwitchStat> switches = new HashMap<String, SwitchStat>();
+
+			for (PortStat s : ports.values()) {
+				// find the switch corresponding to the port we iterate through
+				SwitchStat current = switches.get(s.getSwitchId());
+				if (current == null) {
+					current = new SwitchStat();
+					current.setSwitchId(s.getSwitchId());
+					switches.put(current.getSwitchId(), current);
+				}
+				// update counters value using current port values
+				current.setReceiveBytes(current.getReceiveBytes()
+						+ s.getReceiveBytes());
+				current.setTransmitBytes(current.getTransmitBytes()
+						+ s.getTransmitBytes());
+			}
+
+			// compute load based on port bandwidths
+			for (SwitchStat s : switches.values()) {
+				s.setPeriod(period);
+				SwitchStat previous = switchStats.get(s.getSwitchId());
+				if (previous == null)
+					previous = new SwitchStat();
+				// compute byte difference
+				Long receiveByteDiff = s.getReceiveBytes()
+						- previous.getReceiveBytes();
+				Long transmitByteDiff = s.getTransmitBytes()
+						- previous.getTransmitBytes();
+
+				s.setReceiveBytes(receiveByteDiff);
+				s.setTransmitBytes(transmitByteDiff);
+				s.setLoad((receiveByteDiff.doubleValue() + transmitByteDiff
+						.doubleValue()) / (period.doubleValue() / 1000));
+			}
+
+			switchStats = switches;
+			System.out.println(switchStats);
+		}
+	}
+
 	@Override
 	public String getName() {
 		return "StatCollector";
@@ -168,13 +229,6 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 
 	@Override
 	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
-		switch (msg.getType()) {
-		case PACKET_IN:
-
-			break;
-		default:
-			break;
-		}
 		return Command.CONTINUE;
 	}
 
@@ -217,6 +271,7 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 		linkStats = new HashMap<String, LinkStat>();
 		portStats = new HashMap<String, PortStat>();
 		flowStats = new HashSet<FlowStat>();
+		switchStats = new HashMap<String, SwitchStat>();
 
 		statTimer = new Timer();
 		// link bandwidth
@@ -230,6 +285,10 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 		// flow bandwidth
 		statTimer.schedule(new FlowStatTask(), 200,
 				Constants.STAT_COLLECTION_INTERVAL);
+		// switch load
+		lastTimeSwitchStat = System.currentTimeMillis();
+		statTimer.schedule(new SwitchStatTask(), 300,
+				Constants.STAT_COLLECTION_INTERVAL * 2);
 	}
 
 	public Set<LinkStat> getLinkStats() {
@@ -244,4 +303,8 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 		return flowStats;
 	}
 
+	@Override
+	public Set<SwitchStat> getSwitchStats() {
+		return new HashSet<SwitchStat>(switchStats.values());
+	}
 }

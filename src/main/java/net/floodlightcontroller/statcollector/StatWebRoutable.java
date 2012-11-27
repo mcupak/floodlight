@@ -13,6 +13,7 @@ public class StatWebRoutable implements RestletRoutable {
         router.attach(Constants.LINK_BANDWIDTH, LinkBandwidthResource.class);
         router.attach(Constants.PORT_BANDWIDTH, PortBandwidthResource.class);
         router.attach(Constants.FLOW_BANDWIDTH, FlowBandwidthResource.class);
+        router.attach(Constants.SWITCH_LOAD, SwitchLoadResource.class);
         return router;
     }
 
