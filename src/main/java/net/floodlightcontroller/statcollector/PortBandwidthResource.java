@@ -1,10 +1,6 @@
 package net.floodlightcontroller.statcollector;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-
-import net.floodlightcontroller.core.types.SwitchMessagePair;
 
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;

@@ -15,8 +15,6 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import sun.nio.cs.Surrogate;
-
 /**
  * Deserializer of data obtained via REST API.
  * 
