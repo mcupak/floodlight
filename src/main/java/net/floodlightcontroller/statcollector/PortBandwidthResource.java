@@ -5,6 +5,12 @@ import java.util.Set;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
+/**
+ * Port bandwidth/usage resource displayed via REST.
+ * 
+ * @author mcupak
+ *
+ */
 public class PortBandwidthResource extends ServerResource {
     @Get("json")
     public Set<PortStat> retrieve() {

@@ -6,6 +6,12 @@ import org.restlet.routing.Router;
 
 import net.floodlightcontroller.restserver.RestletRoutable;
 
+/**
+ * RestletRoutable binding Stat Collector module stats to their URLs.
+ * 
+ * @author mcupak
+ *
+ */
 public class StatWebRoutable implements RestletRoutable {
     @Override
     public Restlet getRestlet(Context context) {
