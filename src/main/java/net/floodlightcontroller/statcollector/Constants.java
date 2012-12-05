@@ -22,6 +22,7 @@ public final class Constants {
 	public static final String PORT_BANDWIDTH = "/port/json";
 	public static final String FLOW_BANDWIDTH = "/flow/json";
 	public static final String SWITCH_LOAD = "/switch/json";
+	public static final String DEVICE_ACTIVITY = "/device/json";
 	public static final int STAT_COLLECTION_INTERVAL = 5000;
 	/*
 	 * Input stats.

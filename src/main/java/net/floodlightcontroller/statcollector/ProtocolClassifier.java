@@ -63,13 +63,11 @@ public class ProtocolClassifier implements IFloodlightModule,
 		match.loadFromPacket(pin.getPacketData(), pin.getInPort());
 
 		StatCollector st = new StatCollector();
-		st.getDeviceActivity(match, sw);
 
 		String src = IPv4.fromIPv4Address(match.getNetworkSource());
 
 		h = new MnHost();
 		h.setSrc(src);
-		h.setPktNum(0);
 
 		if (hostArray.isEmpty()) {
 			hostArray.add(h);
@@ -78,7 +76,7 @@ public class ProtocolClassifier implements IFloodlightModule,
 			for (int i = 0; i < hostArray.size(); i++) {
 				if (hostArray.get(i).getSrc().equals(src)) {
 					h = hostArray.get(i);
-					h.setPktNum(h.getPktNum() + 1);
+//					h.setPktNum(h.getPktNum() + 1);
 					hostArray.set(i, h);
 					break;
 				} else {
@@ -100,7 +98,7 @@ public class ProtocolClassifier implements IFloodlightModule,
 		String nw_prtcl = Byte.toString((match.getNetworkProtocol()));
 		System.out.println(nw_prtcl);
 		// Device Activity
-		System.out.println("!!!" + h.getPktNum() + "!!!");
+//		System.out.println("!!!" + h.getPktNum() + "!!!");
 
 		// Protocol Network Checking
 		if (nw_prtcl.equalsIgnoreCase("1")) {
@@ -135,7 +133,7 @@ public class ProtocolClassifier implements IFloodlightModule,
 
 		for (MnHost hosts : al) {
 			// print each element from ArrayList
-			System.out.println(hosts.pktNum);
+//			System.out.println(hosts.pktNum);
 		}
 		return (Integer) null;
 	}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -22,6 +23,7 @@ import net.floodlightcontroller.restserver.IRestApiService;
 
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFMessage;
+import org.openflow.protocol.OFPacketIn;
 import org.openflow.protocol.OFType;
 
 /**
@@ -49,60 +51,10 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	// switch load
 	private long lastTimeSwitchStat;
 	private volatile Map<String, SwitchStat> switchStats;
-	public final ArrayList<MnHost> hostArray = new ArrayList<MnHost>();
-	MnHost h = null;
-
-	public void getDeviceActivity(OFMatch match, IOFSwitch sw)
-	{	
-		
-		//Device activity	
-		//Source Ip address for each packet-in to check the most active host
-		String src = IPv4.fromIPv4Address(match.getNetworkSource());
-
-		//System.out.println("!!!" + h.getPktNum() + "!!!");
-		
-		long swId = sw.getId();
-		Short inPort = match.getInputPort();
-		
-		System.out.println("$$$$$-Input Port-$$$$$");
-		System.out.println(inPort);
-		System.out.println("$$$$$-Network src-$$$$$");
-		System.out.println(src);
-		System.out.println("$$$$$-Switch DPID-$$$$$");
-		System.out.println(swId);
-		
-		/*
-		System.out.println("$$$$$-Switch ID-$$$$$$");
-		System.out.println("!!!" + linkstat + "!!!");*/
-		h = new MnHost();
-		h.setSrc(src);
-		h.setPktNum(0);
-		
-		if(hostArray.isEmpty())
-		{
-			hostArray.add(h);
-		}
-		else
-		{	
-			
-			for(int i=0; i< hostArray.size(); i++)
-			{
-				if(hostArray.get(i).getSrc().equals(src))
-				{
-					h = hostArray.get(i);
-					h.setPktNum(h.getPktNum() + 1);
-					hostArray.set(i,h);
-					break;
-				}
-				else
-				{
-					hostArray.add(h);
-				}
-				
-			}
-		}
-	}
-			
+	// device activity
+	private long lastTimeDeviceStat;
+	private volatile Map<String, DeviceStat> deviceStats;
+	private Set<MnHost> hosts = new HashSet<MnHost>();
 
 	/**
 	 * Inner clas performing link bandwidth measurements.
@@ -264,7 +216,50 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 			}
 
 			switchStats = switches;
-			System.out.println(switchStats);
+		}
+	}
+
+	/**
+	 * Inner clas performing device activity measurements.
+	 * 
+	 * @author mcupak
+	 * 
+	 */
+	class DeviceStatTask extends TimerTask {
+
+		@Override
+		public void run() {
+			Map<String, PortStat> ports = deserializer.getPortStats();
+			Map<String, DeviceStat> devices = new HashMap<String, DeviceStat>();
+			// measure time since last measurement - executed repeatedly just to
+			// be precise
+			long now = System.currentTimeMillis();
+			Long period = new Long(now - lastTimeDeviceStat);
+			lastTimeDeviceStat = now;
+			
+			for (MnHost h : hosts) {
+				DeviceStat device = new DeviceStat();
+				device.setAddress(h.getSrc());
+				
+				PortStat port = ports
+						.get(h.getSwitchId() + "/" + h.getInPort());
+
+				DeviceStat previous = deviceStats.get(device.getAddress());
+				if (previous == null)
+					previous = new DeviceStat();
+				device.setReceiveBytes(port.getReceiveBytes()
+						- previous.getReceiveBytes());
+				device.setTransmitBytes(port.getTransmitBytes()
+						- previous.getTransmitBytes());
+				device.setPeriod(period);
+				device.setActivity((device.getReceiveBytes().doubleValue() + device
+						.getTransmitBytes().doubleValue())
+						/ (period.doubleValue() / 1000));
+
+				devices.put(device.getAddress(), device);
+			}
+
+			deviceStats = devices;
 		}
 	}
 
@@ -285,6 +280,36 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 
 	@Override
 	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
+		// Device activity
+
+		// BasePacket pkt = (BasePacket) IFloodlightProviderService.bcStore.get(
+		// cntx, IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
+		// Instantiate two objects for OFMatch and OFPacketIn
+		OFPacketIn pin = (OFPacketIn) msg;
+		OFMatch match = new OFMatch();
+
+		match.loadFromPacket(pin.getPacketData(), pin.getInPort());
+
+		// Source Ip address for each packet-in to check the most active host
+		String src = IPv4.fromIPv4Address(match.getNetworkSource());
+
+		MnHost h = new MnHost();
+		h.setSrc(src);
+		h.setInPort(new Integer(match.getInputPort()));
+		h.setSwitchId(sw.getStringId());
+
+		// update hosts on port
+		if (!hosts.contains(h)) {
+			for (MnHost m : hosts) {
+				if ((h.getSwitchId().equals(m.getSwitchId()))
+						&& (h.getInPort().equals(m.getInPort()))) {
+					hosts.remove(m);
+					break;
+				}
+			}
+			hosts.add(h);
+		}
+
 		return Command.CONTINUE;
 	}
 
@@ -328,6 +353,7 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 		portStats = new HashMap<String, PortStat>();
 		flowStats = new HashSet<FlowStat>();
 		switchStats = new HashMap<String, SwitchStat>();
+		deviceStats = new HashMap<String, DeviceStat>();
 
 		statTimer = new Timer();
 		// link bandwidth
@@ -345,6 +371,11 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 		lastTimeSwitchStat = System.currentTimeMillis();
 		statTimer.schedule(new SwitchStatTask(), 300,
 				Constants.STAT_COLLECTION_INTERVAL * 2);
+		// device activity
+		lastTimeDeviceStat = System.currentTimeMillis();
+		statTimer.schedule(new DeviceStatTask(), 400,
+				Constants.STAT_COLLECTION_INTERVAL);
+
 	}
 
 	public Set<LinkStat> getLinkStats() {
@@ -363,4 +394,9 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	public Set<SwitchStat> getSwitchStats() {
 		return new HashSet<SwitchStat>(switchStats.values());
 	}
+
+	public Set<DeviceStat> getDeviceStats() {
+		return new HashSet<DeviceStat>(deviceStats.values());
+	}
+
 }
