@@ -47,6 +47,60 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	// switch load
 	private long lastTimeSwitchStat;
 	private volatile Map<String, SwitchStat> switchStats;
+	public final ArrayList<MnHost> hostArray = new ArrayList<MnHost>();
+	MnHost h = null;
+
+	public void getDeviceActivity(OFMatch match, IOFSwitch sw)
+	{	
+		
+		//Device activity	
+		//Source Ip address for each packet-in to check the most active host
+		String src = IPv4.fromIPv4Address(match.getNetworkSource());
+
+		//System.out.println("!!!" + h.getPktNum() + "!!!");
+		
+		long swId = sw.getId();
+		Short inPort = match.getInputPort();
+		
+		System.out.println("$$$$$-Input Port-$$$$$");
+		System.out.println(inPort);
+		System.out.println("$$$$$-Network src-$$$$$");
+		System.out.println(src);
+		System.out.println("$$$$$-Switch DPID-$$$$$");
+		System.out.println(swId);
+		
+		/*
+		System.out.println("$$$$$-Switch ID-$$$$$$");
+		System.out.println("!!!" + linkstat + "!!!");*/
+		h = new MnHost();
+		h.setSrc(src);
+		h.setPktNum(0);
+		
+		if(hostArray.isEmpty())
+		{
+			hostArray.add(h);
+		}
+		else
+		{	
+			
+			for(int i=0; i< hostArray.size(); i++)
+			{
+				if(hostArray.get(i).getSrc().equals(src))
+				{
+					h = hostArray.get(i);
+					h.setPktNum(h.getPktNum() + 1);
+					hostArray.set(i,h);
+					break;
+				}
+				else
+				{
+					hostArray.add(h);
+				}
+				
+			}
+		}
+	}
+			
 
 	/**
 	 * Inner clas performing link bandwidth measurements.
