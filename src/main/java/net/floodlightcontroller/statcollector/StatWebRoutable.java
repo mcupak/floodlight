@@ -1,3 +1,4 @@
+
 package net.floodlightcontroller.statcollector;
 
 import org.restlet.Context;
@@ -21,6 +22,7 @@ public class StatWebRoutable implements RestletRoutable {
         router.attach(Constants.FLOW_BANDWIDTH, FlowBandwidthResource.class);
         router.attach(Constants.SWITCH_LOAD, SwitchLoadResource.class);
         router.attach(Constants.DEVICE_ACTIVITY, DeviceActivityResource.class);
+        router.attach(Constants.PROTOCOL_CLASSIFICATION, ProtocolClassifierResource.class);
         return router;
     }
 

@@ -23,6 +23,7 @@ public final class Constants {
 	public static final String FLOW_BANDWIDTH = "/flow/json";
 	public static final String SWITCH_LOAD = "/switch/json";
 	public static final String DEVICE_ACTIVITY = "/device/json";
+	public static final String PROTOCOL_CLASSIFICATION = "/protocol/json";
 	public static final int STAT_COLLECTION_INTERVAL = 5000;
 	/*
 	 * Input stats.
@@ -30,5 +31,6 @@ public final class Constants {
 	public static final String URL_LINKS = "/wm/topology/links/json";
 	public static final String URL_PORTS = "/wm/core/switch/all/port/json";
 	public static final String URL_FLOWS = "/wm/core/switch/all/flow/json";
+	public static final String URL_PROTOCOLS = "/wm/core/switch/all/protocol/json";
 
 }

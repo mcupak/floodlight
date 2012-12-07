@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import net.floodlightcontroller.core.FloodlightContext;
 import net.floodlightcontroller.core.IFloodlightProviderService;
@@ -54,38 +55,20 @@ public class ProtocolClassifier implements IFloodlightModule,
 	@Override
 	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
 
-		// BasePacket pkt = (BasePacket) IFloodlightProviderService.bcStore.get(
-		// cntx, IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
 		// Instantiate two objects for OFMatch and OFPacketIn
 		OFPacketIn pin = (OFPacketIn) msg;
 		OFMatch match = new OFMatch();
 
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("1","ICMP");map.put("2","IGMP");map.put("6","TCP");map.put("8","EGP");
+		map.put("9","IGP");map.put("17","UDP");map.put("37","DDP");map.put("45","IDRP");
+		map.put("46","RSVP");map.put("47","GRE");map.put("75","PVP");map.put("84","TTP");
+		map.put("88","EIGRP");map.put("89","OSPF");map.put("92","MTP");map.put("94","IPIP");
+		map.put("103","PIM");map.put("108","IPComp");map.put("115","L2TP");map.put("121","SMp");
+		map.put("123","PTP");map.put("124","IS-IS over IPv4");map.put("139","HIP");
+		
 		match.loadFromPacket(pin.getPacketData(), pin.getInPort());
-
-		StatCollector st = new StatCollector();
-
-		String src = IPv4.fromIPv4Address(match.getNetworkSource());
-
-		h = new MnHost();
-		h.setSrc(src);
-
-		if (hostArray.isEmpty()) {
-			hostArray.add(h);
-		} else {
-
-			for (int i = 0; i < hostArray.size(); i++) {
-				if (hostArray.get(i).getSrc().equals(src)) {
-					h = hostArray.get(i);
-//					h.setPktNum(h.getPktNum() + 1);
-					hostArray.set(i, h);
-					break;
-				} else {
-					hostArray.add(h);
-				}
-
-			}
-		}
-
+		
 		// Destination IP Address for each packet-in
 		System.out.println("$$$$$-Get the Desitnation IP Address-$$$$$");
 		System.out.println(IPv4.fromIPv4Address(match.getNetworkDestination()));
@@ -97,45 +80,21 @@ public class ProtocolClassifier implements IFloodlightModule,
 		System.out.println("$$$$$-Network Protocol-$$$$$$");
 		String nw_prtcl = Byte.toString((match.getNetworkProtocol()));
 		System.out.println(nw_prtcl);
-		// Device Activity
-//		System.out.println("!!!" + h.getPktNum() + "!!!");
+		
+		//Classifying Protocol Network
 
-		// Protocol Network Checking
-		if (nw_prtcl.equalsIgnoreCase("1")) {
-			System.out.println("ICMP, L3 Protocol");
-		} else if (nw_prtcl.equalsIgnoreCase("2")) {
-			System.out.println("IGMP, L3 Protocol");
-		} else if (nw_prtcl.equalsIgnoreCase("45")) {
-			System.out.println("IDRP, L3 Protocol");
-		} else if (nw_prtcl.equalsIgnoreCase("47")) {
-			System.out.println("GRE, L3 Protocol");
-		} else if (nw_prtcl.equalsIgnoreCase("54")) {
-			System.out.println("NHRP, L3 Protocol");
-		} else if (nw_prtcl.equalsIgnoreCase("89")) {
-			System.out.println("OSPF, L3 Protocol");
-		} else if (nw_prtcl.equalsIgnoreCase("124")) {
-			System.out.println("IS-IS, L3 Protocol");
-		} else {
-			System.out.println("Not Listed!");
+		if(map.containsKey(nw_prtcl))
+		{
+			System.out.println(map.get(nw_prtcl));
 		}
+		
 
 		// Here we print the entire packet-in array which has all matchable
 		// fields
 		System.out.println("$$$$$-PacketIn ARRAY-$$$$$");
 		System.out.println(Arrays.asList(match));
-		System.out.println("$$$$$-Network Destination-$$$$$");
-		System.out.println(IPv4.fromIPv4Address(match.getNetworkDestination()));
 
 		return Command.CONTINUE;
-	}
-
-	public int getActivity(ArrayList<MnHost> al) {
-
-		for (MnHost hosts : al) {
-			// print each element from ArrayList
-//			System.out.println(hosts.pktNum);
-		}
-		return (Integer) null;
 	}
 
 	@Override
@@ -169,6 +128,11 @@ public class ProtocolClassifier implements IFloodlightModule,
 	@Override
 	public void startUp(FloodlightModuleContext context) {
 		floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
+	}
+	
+	public Set<ProtocolStat> getProtocolStats() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

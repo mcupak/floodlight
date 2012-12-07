@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -28,6 +27,7 @@ import org.openflow.protocol.OFType;
 
 /**
  * Collector of throughput/bandwidth/load-related stats.
+ * Device Activity
  * 
  * @author mcupak
  * 
@@ -57,15 +57,17 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	private Set<MnHost> hosts = new HashSet<MnHost>();
 
 	/**
-	 * Inner clas performing link bandwidth measurements.
+	 * Inner class performing link bandwidth measurements.
 	 * 
 	 * @author mcupak
 	 * 
 	 */
+	
 	class LinkStatTask extends TimerTask {
 
 		@Override
-		public void run() {
+		public void run() 
+		{
 			Map<String, LinkStat> links = deserializer.getLinkStats();
 			Map<String, PortStat> ports = deserializer.getPortStats();
 			long now = System.currentTimeMillis();
@@ -220,7 +222,7 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	}
 
 	/**
-	 * Inner clas performing device activity measurements.
+	 * Inner  performing device activity measurements.
 	 * 
 	 * @author mcupak
 	 * 
@@ -262,6 +264,7 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 			deviceStats = devices;
 		}
 	}
+	
 
 	@Override
 	public String getName() {
@@ -280,10 +283,9 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 
 	@Override
 	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
-		// Device activity
-
-		// BasePacket pkt = (BasePacket) IFloodlightProviderService.bcStore.get(
-		// cntx, IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
+		
+		
+		// Device activity		
 		// Instantiate two objects for OFMatch and OFPacketIn
 		OFPacketIn pin = (OFPacketIn) msg;
 		OFMatch match = new OFMatch();
@@ -397,6 +399,12 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 
 	public Set<DeviceStat> getDeviceStats() {
 		return new HashSet<DeviceStat>(deviceStats.values());
+	}
+
+	@Override
+	public Set<ProtocolStat> getProtocolStats() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

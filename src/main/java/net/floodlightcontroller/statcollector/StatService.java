@@ -16,5 +16,6 @@ public interface StatService extends IFloodlightService {
 	Set<PortStat> getPortStats();
 	Set<FlowStat> getFlowStats();
 	Set<SwitchStat> getSwitchStats();	
-	Set<DeviceStat> getDeviceStats();	
+	Set<DeviceStat> getDeviceStats();
+	Set<ProtocolStat> getProtocolStats();
 }
