@@ -1,4 +1,4 @@
-package net.floodlightcontroller.statcollector;
+package net.floodlightcontroller.protocolclassifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +18,8 @@ import net.floodlightcontroller.core.module.IFloodlightService;
 import net.floodlightcontroller.packet.Ethernet;
 import net.floodlightcontroller.packet.IPv4;
 import net.floodlightcontroller.restserver.IRestApiService;
+import net.floodlightcontroller.statcollector.MnHost;
+import net.floodlightcontroller.statcollector.ProtocolStat;
 
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFMessage;
@@ -80,7 +82,6 @@ public class ProtocolClassifier implements IFloodlightModule,
 		System.out.println("$$$$$-Network Protocol-$$$$$$");
 		String nw_prtcl = Byte.toString((match.getNetworkProtocol()));
 		System.out.println(nw_prtcl);
-		
 		//Classifying Protocol Network
 
 		if(map.containsKey(nw_prtcl))
