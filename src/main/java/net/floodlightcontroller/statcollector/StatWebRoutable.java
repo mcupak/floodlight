@@ -5,6 +5,7 @@ import org.restlet.Context;
 import org.restlet.Restlet;
 import org.restlet.routing.Router;
 
+import net.floodlightcontroller.protocolclassifier.ProtocolClassifierResource;
 import net.floodlightcontroller.restserver.RestletRoutable;
 
 /**
@@ -22,7 +23,6 @@ public class StatWebRoutable implements RestletRoutable {
         router.attach(Constants.FLOW_BANDWIDTH, FlowBandwidthResource.class);
         router.attach(Constants.SWITCH_LOAD, SwitchLoadResource.class);
         router.attach(Constants.DEVICE_ACTIVITY, DeviceActivityResource.class);
-        router.attach(Constants.PROTOCOL_CLASSIFICATION, ProtocolClassifierResource.class);
         return router;
     }
 

@@ -18,6 +18,7 @@ import net.floodlightcontroller.core.module.FloodlightModuleException;
 import net.floodlightcontroller.core.module.IFloodlightModule;
 import net.floodlightcontroller.core.module.IFloodlightService;
 import net.floodlightcontroller.packet.IPv4;
+import net.floodlightcontroller.protocolclassifier.ProtocolStat;
 import net.floodlightcontroller.restserver.IRestApiService;
 
 import org.openflow.protocol.OFMatch;
@@ -26,8 +27,7 @@ import org.openflow.protocol.OFPacketIn;
 import org.openflow.protocol.OFType;
 
 /**
- * Collector of throughput/bandwidth/load-related stats.
- * Device Activity
+ * Collector of throughput/bandwidth/load-related stats. Device Activity
  * 
  * @author mcupak
  * 
@@ -62,12 +62,11 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	 * @author mcupak
 	 * 
 	 */
-	
+
 	class LinkStatTask extends TimerTask {
 
 		@Override
-		public void run() 
-		{
+		public void run() {
 			Map<String, LinkStat> links = deserializer.getLinkStats();
 			Map<String, PortStat> ports = deserializer.getPortStats();
 			long now = System.currentTimeMillis();
@@ -222,7 +221,7 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	}
 
 	/**
-	 * Inner  performing device activity measurements.
+	 * Inner performing device activity measurements.
 	 * 
 	 * @author mcupak
 	 * 
@@ -238,11 +237,11 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 			long now = System.currentTimeMillis();
 			Long period = new Long(now - lastTimeDeviceStat);
 			lastTimeDeviceStat = now;
-			
+
 			for (MnHost h : hosts) {
 				DeviceStat device = new DeviceStat();
 				device.setAddress(h.getSrc());
-				
+
 				PortStat port = ports
 						.get(h.getSwitchId() + "/" + h.getInPort());
 
@@ -264,7 +263,6 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 			deviceStats = devices;
 		}
 	}
-	
 
 	@Override
 	public String getName() {
@@ -283,9 +281,8 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 
 	@Override
 	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
-		
-		
-		// Device activity		
+
+		// Device activity
 		// Instantiate two objects for OFMatch and OFPacketIn
 		OFPacketIn pin = (OFPacketIn) msg;
 		OFMatch match = new OFMatch();
@@ -399,12 +396,6 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 
 	public Set<DeviceStat> getDeviceStats() {
 		return new HashSet<DeviceStat>(deviceStats.values());
-	}
-
-	@Override
-	public Set<ProtocolStat> getProtocolStats() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

@@ -3,6 +3,7 @@ package net.floodlightcontroller.statcollector;
 import java.util.Set;
 
 import net.floodlightcontroller.core.module.IFloodlightService;
+import net.floodlightcontroller.protocolclassifier.ProtocolStat;
 
 /**
  * Service interface used by the Stat Collector module.
@@ -17,5 +18,4 @@ public interface StatService extends IFloodlightService {
 	Set<FlowStat> getFlowStats();
 	Set<SwitchStat> getSwitchStats();	
 	Set<DeviceStat> getDeviceStats();
-	Set<ProtocolStat> getProtocolStats();
 }

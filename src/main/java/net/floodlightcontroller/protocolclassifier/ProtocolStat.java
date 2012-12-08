@@ -1,4 +1,4 @@
-package net.floodlightcontroller.statcollector;
+package net.floodlightcontroller.protocolclassifier;
 
 public class ProtocolStat 
 {

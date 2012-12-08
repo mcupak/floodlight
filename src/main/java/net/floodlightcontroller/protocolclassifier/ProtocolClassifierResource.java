@@ -1,6 +1,8 @@
-package net.floodlightcontroller.statcollector;
+package net.floodlightcontroller.protocolclassifier;
 
 import java.util.Set;
+
+import net.floodlightcontroller.statcollector.StatService;
 
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
@@ -8,7 +10,7 @@ import org.restlet.resource.ServerResource;
 public class ProtocolClassifierResource extends ServerResource {
 	    @Get("json")
 	    public Set<ProtocolStat> retrieve() {
-	        StatService s = (StatService)getContext().getAttributes().get(StatService.class.getCanonicalName());
+	        ProtocolService s = (ProtocolService)getContext().getAttributes().get(StatService.class.getCanonicalName());
 	        return s.getProtocolStats();
 	    }
 

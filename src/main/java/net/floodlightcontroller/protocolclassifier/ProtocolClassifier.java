@@ -19,7 +19,6 @@ import net.floodlightcontroller.packet.Ethernet;
 import net.floodlightcontroller.packet.IPv4;
 import net.floodlightcontroller.restserver.IRestApiService;
 import net.floodlightcontroller.statcollector.MnHost;
-import net.floodlightcontroller.statcollector.ProtocolStat;
 
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFMessage;
