@@ -26,6 +26,10 @@ public class ProtocolStat
 		return map;
 	}
 
+	public ProtocolStat() {
+		super();
+	}
+	
 	public void setMap(Map<String, String> map) {
 		
 		this.map = map;
@@ -56,14 +60,10 @@ public class ProtocolStat
 	public void setPercentage(double percentage) {
 		
 		
-		this.percentage = percentage/total;
+		this.percentage = (1- (percentage/total)) * 100;
 	}
 
-	@Override
-	public String toString() {
-		return " Network Protocol" + ", Protocol Type:" + nw_prot_type
-				+ ", Usage: "+percentage + ", Number of Flows: " + no + ", Total Number of Flows: " + total;
-	}
+	
 
 	public String getNw_prot() {
 		return nw_prot;
@@ -72,17 +72,19 @@ public class ProtocolStat
 	public void setNw_prot(String nw_prot) {
 		this.nw_prot = nw_prot;
 	}
-
-	public ProtocolStat() {
-		super();
-	}
-
 	public int getTotal() {
 		return total;
 	}
 
 	public void setTotal(int total) {
 		this.total = total;
+	}
+	
+
+	@Override
+	public String toString() {
+		return " Network Protocol" + ", Protocol Type:" + nw_prot_type
+				+ ", Usage: %"+percentage + ", Number of Flows: " + no + ", Total Number of Flows: " + total;
 	}
 
 }
