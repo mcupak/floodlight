@@ -30,7 +30,6 @@ public class ProtocolClassifier implements IFloodlightModule,
 	private volatile Map<String, ProtocolStat> protocolStats;
 	ProtocolStat prtc;
 	
-	
 
 	@Override
 	public String getName() {
@@ -59,8 +58,7 @@ public class ProtocolClassifier implements IFloodlightModule,
 		OFPacketIn pin = (OFPacketIn) msg;
 		OFMatch match = new OFMatch();		
 		
-		match.loadFromPacket(pin.getPacketData(), pin.getInPort());
-		
+		match.loadFromPacket(pin.getPacketData(), pin.getInPort());		
 		
 		String nw_prtc = Byte.toString((match.getNetworkProtocol()));
 		
@@ -77,16 +75,19 @@ public class ProtocolClassifier implements IFloodlightModule,
 			prtc.setNw_prot(nw_prtc);
 			prtc.setNw_prot_type(nw_prtc);
 			prtc.setNo(0);
+			prtc.setPercentage(0);
 		}
 		
-		prtc.setPercantage(prtc.getNo()/prtc.getTotal());
+		//int percentage = (prtc.getNo())/(prtc.getTotal());
+		
+		//prtc.setPercantage(percentage);
 		
 		protocolStats.put(nw_prtc, prtc);
 		
 		
 		System.out.println(prtc.getNw_prot_type());
 		System.out.println(prtc.getNo());
-		System.out.println(prtc.getPercantage());
+		System.out.println(prtc.getPercentage());
 		
 
 		return Command.CONTINUE;

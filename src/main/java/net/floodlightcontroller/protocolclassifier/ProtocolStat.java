@@ -8,11 +8,8 @@ public class ProtocolStat
 {
 	private String nw_prot;
 	private String nw_prot_type;
-	private int no;	
-	
-	private int total;
-	private long percentage;	
-	private Integer no_Flows;
+	private int no;
+	private int percentage;	
 	
 	
 	Map<String, String> map;
@@ -51,28 +48,20 @@ public class ProtocolStat
 		this.no = no;
 	}
 
-	public long getPercantage() {
+	public int getPercentage() {
 		
 		return percentage;
 	}
 
-	public void setPercantage(long percantage) {
+	public void setPercentage(int percentage) {
 		
-		this.percentage = percantage;
+		this.percentage = percentage;
 	}
 
-	public Integer getNo_Flows() {
-		return no_Flows;
-	}
-
-	public void setNo_Flows(Integer no_Flows) {
-		this.no_Flows = no_Flows;
-	}
-	
 	@Override
 	public String toString() {
-		return "Protocol Classification: [Protocol Type:" + nw_prot_type + ":" + no 
-				+ ", Usage: "+percentage + "Number of Flows:" + no_Flows + "]";
+		return "Protocol Classification: [Protocol Type:" + nw_prot_type + ":" + nw_prot 
+				+ ", Usage: "+percentage + "Number of Flows:" + no + "]";
 	}
 
 	public String getNw_prot() {
@@ -87,11 +76,4 @@ public class ProtocolStat
 		super();
 	}
 
-	public int getTotal() {
-		return total++;
-	}
-
-	public void setTotal(int total) {
-		this.total = total;
-	}
 }
