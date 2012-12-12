@@ -79,7 +79,8 @@ public class ProtocolClassifier implements IFloodlightModule,
 			prtc.setPercentage(0);
 		}
 		
-		prtc.setPercentage(prtc.getNo()/total);
+		prtc.setTotal(total);
+		prtc.setPercentage(prtc.getNo());
 		protocolStats.put(nw_prtc, prtc);
 		
 		
