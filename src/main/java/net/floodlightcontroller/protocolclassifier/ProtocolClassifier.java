@@ -29,7 +29,7 @@ public class ProtocolClassifier implements IFloodlightModule,
 	protected IRestApiService restApi;
 	private volatile Map<String, ProtocolStat> protocolStats;
 	ProtocolStat prtc;
-	
+	int total;
 
 	@Override
 	public String getName() {
@@ -63,6 +63,7 @@ public class ProtocolClassifier implements IFloodlightModule,
 		String nw_prtc = Byte.toString((match.getNetworkProtocol()));
 		
 		prtc = new ProtocolStat();
+		total++;
 		
 		if(protocolStats.containsKey(nw_prtc))
 		{
@@ -78,10 +79,8 @@ public class ProtocolClassifier implements IFloodlightModule,
 			prtc.setPercentage(0);
 		}
 		
-		//int percentage = (prtc.getNo())/(prtc.getTotal());
-		
-		//prtc.setPercantage(percentage);
-		
+		prtc.setPercentage(prtc.getNo()/total);
+		//prtc.setPercentage(total);
 		protocolStats.put(nw_prtc, prtc);
 		
 		

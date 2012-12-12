@@ -9,8 +9,7 @@ public class ProtocolStat
 	private String nw_prot;
 	private String nw_prot_type;
 	private int no;
-	private int percentage;	
-	
+	private double percentage;	
 	
 	Map<String, String> map;
 		
@@ -48,12 +47,12 @@ public class ProtocolStat
 		this.no = no;
 	}
 
-	public int getPercentage() {
+	public double getPercentage() {
 		
 		return percentage;
 	}
 
-	public void setPercentage(int percentage) {
+	public void setPercentage(double percentage) {
 		
 		this.percentage = percentage;
 	}
