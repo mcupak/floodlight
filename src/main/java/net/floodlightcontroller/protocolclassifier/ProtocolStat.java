@@ -59,8 +59,8 @@ public class ProtocolStat
 
 	@Override
 	public String toString() {
-		return "Protocol Classification: [Protocol Type:" + nw_prot_type + ":" + nw_prot 
-				+ ", Usage: "+percentage + "Number of Flows:" + no + "]";
+		return "Network Protocol, " + "Protocol Type:" + nw_prot_type
+				+ ", Usage: "+percentage + ", Number of Flows: " + no ;
 	}
 
 	public String getNw_prot() {
