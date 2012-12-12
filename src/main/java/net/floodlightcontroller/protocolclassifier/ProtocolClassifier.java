@@ -1,9 +1,9 @@
 package net.floodlightcontroller.protocolclassifier;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,24 +15,22 @@ import net.floodlightcontroller.core.module.FloodlightModuleContext;
 import net.floodlightcontroller.core.module.FloodlightModuleException;
 import net.floodlightcontroller.core.module.IFloodlightModule;
 import net.floodlightcontroller.core.module.IFloodlightService;
-import net.floodlightcontroller.packet.Ethernet;
-import net.floodlightcontroller.packet.IPv4;
 import net.floodlightcontroller.restserver.IRestApiService;
-import net.floodlightcontroller.statcollector.MnHost;
 
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFPacketIn;
 import org.openflow.protocol.OFType;
-import org.openflow.util.HexString;
 
 public class ProtocolClassifier implements IFloodlightModule,
 		IOFMessageListener {
 
 	protected IFloodlightProviderService floodlightProvider;
 	protected IRestApiService restApi;
-	public final ArrayList<MnHost> hostArray = new ArrayList<MnHost>();
-	MnHost h = null;
+	private volatile Map<String, ProtocolStat> protocolStats;
+	ProtocolStat prtc;
+	
+	
 
 	@Override
 	public String getName() {
@@ -54,45 +52,42 @@ public class ProtocolClassifier implements IFloodlightModule,
 
 	// This is where we pull fields from the packet-in
 	@Override
-	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
+	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) 
+	{
 
 		// Instantiate two objects for OFMatch and OFPacketIn
 		OFPacketIn pin = (OFPacketIn) msg;
-		OFMatch match = new OFMatch();
-
-		Map<String, String> map = new HashMap<String, String>();
-		map.put("1","ICMP");map.put("2","IGMP");map.put("6","TCP");map.put("8","EGP");
-		map.put("9","IGP");map.put("17","UDP");map.put("37","DDP");map.put("45","IDRP");
-		map.put("46","RSVP");map.put("47","GRE");map.put("75","PVP");map.put("84","TTP");
-		map.put("88","EIGRP");map.put("89","OSPF");map.put("92","MTP");map.put("94","IPIP");
-		map.put("103","PIM");map.put("108","IPComp");map.put("115","L2TP");map.put("121","SMp");
-		map.put("123","PTP");map.put("124","IS-IS over IPv4");map.put("139","HIP");
+		OFMatch match = new OFMatch();		
 		
 		match.loadFromPacket(pin.getPacketData(), pin.getInPort());
 		
-		// Destination IP Address for each packet-in
-		System.out.println("$$$$$-Get the Desitnation IP Address-$$$$$");
-		System.out.println(IPv4.fromIPv4Address(match.getNetworkDestination()));
-		// Source Mac Address for each packet-in
-		System.out.println("$$$$$-Mac Address Destination-$$$$$$");
-		Long sourceMACHash = Ethernet.toLong(match.getDataLayerDestination());
-		System.out.println(HexString.toHexString(sourceMACHash));
-		// Classifying the network protocol
-		System.out.println("$$$$$-Network Protocol-$$$$$$");
-		String nw_prtcl = Byte.toString((match.getNetworkProtocol()));
-		System.out.println(nw_prtcl);
-		//Classifying Protocol Network
-
-		if(map.containsKey(nw_prtcl))
+		
+		String nw_prtc = Byte.toString((match.getNetworkProtocol()));
+		
+		prtc = new ProtocolStat();
+		
+		if(protocolStats.containsKey(nw_prtc))
 		{
-			System.out.println(map.get(nw_prtcl));
+			prtc = protocolStats.get(nw_prtc);
+			prtc.setNo(prtc.getNo() + 1);
+			
+		}
+		else
+		{
+			prtc.setNw_prot(nw_prtc);
+			prtc.setNw_prot_type(nw_prtc);
+			prtc.setNo(0);
 		}
 		
-
-		// Here we print the entire packet-in array which has all matchable
-		// fields
-		System.out.println("$$$$$-PacketIn ARRAY-$$$$$");
-		System.out.println(Arrays.asList(match));
+		prtc.setPercantage(prtc.getNo()/prtc.getTotal());
+		
+		protocolStats.put(nw_prtc, prtc);
+		
+		
+		System.out.println(prtc.getNw_prot_type());
+		System.out.println(prtc.getNo());
+		System.out.println(prtc.getPercantage());
+		
 
 		return Command.CONTINUE;
 	}
@@ -126,13 +121,21 @@ public class ProtocolClassifier implements IFloodlightModule,
 	}
 
 	@Override
-	public void startUp(FloodlightModuleContext context) {
+	public void startUp(FloodlightModuleContext context) 
+	{
 		floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
+		
+		protocolStats = new HashMap<String, ProtocolStat>();
+		
+		// Protocol Classifier
+		//statTimer = new Timer();
+		
 	}
 	
 	public Set<ProtocolStat> getProtocolStats() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return new HashSet<ProtocolStat>(protocolStats.values());
+		
 	}
 
 }

@@ -1,25 +1,78 @@
 package net.floodlightcontroller.protocolclassifier;
 
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class ProtocolStat 
 {
-	private String dl_des;
-	private String dl_src;
-	private String nw_des;
-	private String nw_src;
 	private String nw_prot;
 	private String nw_prot_type;
+	private int no;	
+	
+	private int total;
+	private long percentage;	
+	private Integer no_Flows;
 	
 	
+	Map<String, String> map;
+		
+	public Map<String, String> getMap() {
+		
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("1","ICMP");map.put("2","IGMP");map.put("6","TCP");map.put("8","EGP");
+		map.put("9","IGP");map.put("17","UDP");map.put("37","DDP");map.put("45","IDRP");
+		map.put("46","RSVP");map.put("47","GRE");map.put("75","PVP");map.put("84","TTP");
+		map.put("88","EIGRP");map.put("89","OSPF");map.put("92","MTP");map.put("94","IPIP");
+		map.put("103","PIM");map.put("108","IPComp");map.put("115","L2TP");map.put("121","SMp");
+		map.put("123","PTP");map.put("124","IS-IS over IPv4");map.put("139","HIP");
+		return map;
+	}
+
+	public void setMap(Map<String, String> map) {
+		
+		this.map = map;
+	}
+
 	public String getNw_prot_type() {
 		return nw_prot_type;
 	}
 
-	public void setNw_prot_type(String nw_prot_type) {
-		this.nw_prot_type = nw_prot_type;
+	public void setNw_prot_type(String nw_prot) 
+	{				
+		this.nw_prot_type = this.getMap().get(nw_prot);
+	}
+	
+	public int getNo() {
+		return no;
 	}
 
-	public ProtocolStat() {
-		super();
+	public void setNo(int no) {
+		this.no = no;
+	}
+
+	public long getPercantage() {
+		
+		return percentage;
+	}
+
+	public void setPercantage(long percantage) {
+		
+		this.percentage = percantage;
+	}
+
+	public Integer getNo_Flows() {
+		return no_Flows;
+	}
+
+	public void setNo_Flows(Integer no_Flows) {
+		this.no_Flows = no_Flows;
+	}
+	
+	@Override
+	public String toString() {
+		return "Protocol Classification: [Protocol Type:" + nw_prot_type + ":" + no 
+				+ ", Usage: "+percentage + "Number of Flows:" + no_Flows + "]";
 	}
 
 	public String getNw_prot() {
@@ -30,42 +83,15 @@ public class ProtocolStat
 		this.nw_prot = nw_prot;
 	}
 
-	public String getDl_des() {
-		return dl_des;
+	public ProtocolStat() {
+		super();
 	}
 
-	public void setDl_des(String dl_des) {
-		this.dl_des = dl_des;
+	public int getTotal() {
+		return total++;
 	}
 
-	public String getNw_des() {
-		return nw_des;
-	}
-
-	public void setNw_des(String nw_des) {
-		this.nw_des = nw_des;
-	}
-
-	public String getNw_src() {
-		return nw_src;
-	}
-
-	public void setNw_src(String nw_src) {
-		this.nw_src = nw_src;
-	}
-
-	public String getDl_src() {
-		return dl_src;
-	}
-
-	public void setDl_src(String dl_src) {
-		this.dl_src = dl_src;
-	}
-
-	@Override
-	public String toString() {
-		return "Protocol Classification: [Source IP Address=" + nw_src + " Source MAC Address:" + dl_src + " Network Protocol=" + 
-				nw_prot + ", Protocol:" + nw_prot_type + " Destination IP Address=" + nw_des 
-				+ " Destination MAC Address:" + dl_des + "]";
+	public void setTotal(int total) {
+		this.total = total;
 	}
 }

@@ -18,7 +18,6 @@ import net.floodlightcontroller.core.module.FloodlightModuleException;
 import net.floodlightcontroller.core.module.IFloodlightModule;
 import net.floodlightcontroller.core.module.IFloodlightService;
 import net.floodlightcontroller.packet.IPv4;
-import net.floodlightcontroller.protocolclassifier.ProtocolStat;
 import net.floodlightcontroller.restserver.IRestApiService;
 
 import org.openflow.protocol.OFMatch;
@@ -238,7 +237,8 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 			Long period = new Long(now - lastTimeDeviceStat);
 			lastTimeDeviceStat = now;
 
-			for (MnHost h : hosts) {
+			for (MnHost h : hosts) 
+			{
 				DeviceStat device = new DeviceStat();
 				device.setAddress(h.getSrc());
 
@@ -343,7 +343,8 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	}
 
 	@Override
-	public void startUp(FloodlightModuleContext context) {
+	public void startUp(FloodlightModuleContext context) 
+	{
 		floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
 		restApi.addRestletRoutable(new StatWebRoutable());
 		deserializer = StatDeserializer.getInstance();
