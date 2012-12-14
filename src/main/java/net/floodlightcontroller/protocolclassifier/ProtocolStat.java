@@ -58,12 +58,9 @@ public class ProtocolStat
 	}
 
 	public void setPercentage(double percentage) {
-		
-		
-		this.percentage = (1- (percentage/total)) * 100;
-	}
-
-	
+				
+		this.percentage = Math.ceil((percentage/total) * 100);
+	}	
 
 	public String getNw_prot() {
 		return nw_prot;
@@ -83,8 +80,8 @@ public class ProtocolStat
 
 	@Override
 	public String toString() {
-		return " Network Protocol" + ", Protocol Type:" + nw_prot_type
-				+ ", Usage: %"+percentage + ", Number of Flows: " + no + ", Total Number of Flows: " + total;
+		return " Protocol Number" + ", Protocol Type: " + nw_prot_type
+				+ ", Used in Network: "+percentage + " %, Flows Using " + nw_prot_type + " Protocol: " + no + ", Total Number of Flows : " + total;
 	}
 
 }
