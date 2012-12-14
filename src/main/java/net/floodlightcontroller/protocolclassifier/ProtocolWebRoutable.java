@@ -8,7 +8,7 @@ import net.floodlightcontroller.protocolclassifier.ProtocolClassifierResource;
 import net.floodlightcontroller.restserver.RestletRoutable;
 
 /**
- * RestletRoutable binding Stat Collector module stats to their URLs.
+ * RestletRoutable binding Protocol Classifier module stats to their URLs.
  * 
  * @author mcupak
  * 
@@ -16,7 +16,7 @@ import net.floodlightcontroller.restserver.RestletRoutable;
 public class ProtocolWebRoutable implements RestletRoutable {
 
 	public static final String PROTOCOL_CLASSIFICATION = "/protocol/json";
-	public static final String URL_BASE = "/wm/stat";
+	public static final String URL_BASE = "/wm/protocol";
 
 	@Override
 	public Restlet getRestlet(Context context) {

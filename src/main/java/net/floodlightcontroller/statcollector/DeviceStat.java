@@ -6,8 +6,7 @@ package net.floodlightcontroller.statcollector;
  * @author mcupak
  * 
  */
-public class DeviceStat 
-{
+public class DeviceStat {
 	private String address = "";
 	private Long period = new Long(0);
 	private Long receiveBytes = new Long(0);

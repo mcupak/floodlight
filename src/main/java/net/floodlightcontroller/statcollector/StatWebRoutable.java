@@ -5,7 +5,6 @@ import org.restlet.Context;
 import org.restlet.Restlet;
 import org.restlet.routing.Router;
 
-import net.floodlightcontroller.protocolclassifier.ProtocolClassifierResource;
 import net.floodlightcontroller.restserver.RestletRoutable;
 
 /**

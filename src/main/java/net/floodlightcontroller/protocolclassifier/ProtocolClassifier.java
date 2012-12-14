@@ -23,11 +23,11 @@ import org.openflow.protocol.OFPacketIn;
 import org.openflow.protocol.OFType;
 
 public class ProtocolClassifier implements IFloodlightModule,
-		IOFMessageListener {
+		IOFMessageListener, ProtocolService {
 
 	protected IFloodlightProviderService floodlightProvider;
 	protected IRestApiService restApi;
-	private volatile Map<String, ProtocolStat> protocolStats;
+	private Map<String, ProtocolStat> protocolStats;
 	ProtocolStat prtc;
 	int total;
 
@@ -51,41 +51,40 @@ public class ProtocolClassifier implements IFloodlightModule,
 
 	// This is where we pull fields from the packet-in
 	@Override
-	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) 
-	{
+	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
+		switch (msg.getType()) {
+		case PACKET_IN:
+			// Instantiate two objects for OFMatch and OFPacketIn
+			OFPacketIn pin = (OFPacketIn) msg;
+			OFMatch match = new OFMatch();
 
-		// Instantiate two objects for OFMatch and OFPacketIn
-		OFPacketIn pin = (OFPacketIn) msg;
-		OFMatch match = new OFMatch();		
-		
-		match.loadFromPacket(pin.getPacketData(), pin.getInPort());		
-		
-		String nw_prtc = Byte.toString((match.getNetworkProtocol()));
-		
-		prtc = new ProtocolStat();
-		total++;
-		
-		if(protocolStats.containsKey(nw_prtc))
-		{
-			prtc = protocolStats.get(nw_prtc);
-			prtc.setNo(prtc.getNo() + 1);
-			
+			match.loadFromPacket(pin.getPacketData(), pin.getInPort());
+
+			String nw_prtc = Byte.toString((match.getNetworkProtocol()));
+
+			prtc = new ProtocolStat();
+			total++;
+
+			if (protocolStats.containsKey(nw_prtc)) {
+				prtc = protocolStats.get(nw_prtc);
+				prtc.setNo(prtc.getNo() + 1);
+
+			} else {
+				prtc.setNw_prot(nw_prtc);
+				prtc.setNw_prot_type(nw_prtc);
+				prtc.setNo(0);
+				prtc.setPercentage(0);
+			}
+
+			prtc.setTotal(total);
+			prtc.setPercentage(prtc.getNo());
+			protocolStats.put(nw_prtc, prtc);
+
+			System.out.println(prtc);
+			break;
+		default:
+			break;
 		}
-		else
-		{
-			prtc.setNw_prot(nw_prtc);
-			prtc.setNw_prot_type(nw_prtc);
-			prtc.setNo(0);
-			prtc.setPercentage(0);
-		}
-		
-		prtc.setTotal(total);
-		prtc.setPercentage(prtc.getNo());
-		protocolStats.put(nw_prtc, prtc);
-		
-		
-		System.out.println(protocolStats.entrySet());
-		
 
 		return Command.CONTINUE;
 	}
@@ -93,12 +92,14 @@ public class ProtocolClassifier implements IFloodlightModule,
 	@Override
 	public Collection<Class<? extends IFloodlightService>> getModuleServices() {
 		Collection<Class<? extends IFloodlightService>> l = new ArrayList<Class<? extends IFloodlightService>>();
+		l.add(ProtocolService.class);
 		return l;
 	}
 
 	@Override
 	public Map<Class<? extends IFloodlightService>, IFloodlightService> getServiceImpls() {
 		Map<Class<? extends IFloodlightService>, IFloodlightService> m = new HashMap<Class<? extends IFloodlightService>, IFloodlightService>();
+		m.put(ProtocolService.class, this);
 		return m;
 	}
 
@@ -115,25 +116,18 @@ public class ProtocolClassifier implements IFloodlightModule,
 		floodlightProvider = context
 				.getServiceImpl(IFloodlightProviderService.class);
 		restApi = context.getServiceImpl(IRestApiService.class);
-
 	}
 
 	@Override
-	public void startUp(FloodlightModuleContext context) 
-	{
+	public void startUp(FloodlightModuleContext context) {
 		floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
-		
+		restApi.addRestletRoutable(new ProtocolWebRoutable());
+
 		protocolStats = new HashMap<String, ProtocolStat>();
-		
-		// Protocol Classifier
-		//statTimer = new Timer();
-		
-	}
-	
-	public Set<ProtocolStat> getProtocolStats() {
-		
-		return new HashSet<ProtocolStat>(protocolStats.values());
-		
 	}
 
+	@Override
+	public Set<ProtocolStat> getProtocolStats() {
+		return new HashSet<ProtocolStat>(protocolStats.values());
+	}
 }

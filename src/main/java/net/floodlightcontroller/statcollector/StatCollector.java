@@ -237,27 +237,28 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 			Long period = new Long(now - lastTimeDeviceStat);
 			lastTimeDeviceStat = now;
 
-			for (MnHost h : hosts) 
-			{
+			for (MnHost h : hosts) {
 				DeviceStat device = new DeviceStat();
 				device.setAddress(h.getSrc());
 
 				PortStat port = ports
 						.get(h.getSwitchId() + "/" + h.getInPort());
 
-				DeviceStat previous = deviceStats.get(device.getAddress());
-				if (previous == null)
-					previous = new DeviceStat();
-				device.setReceiveBytes(port.getReceiveBytes()
-						- previous.getReceiveBytes());
-				device.setTransmitBytes(port.getTransmitBytes()
-						- previous.getTransmitBytes());
-				device.setPeriod(period);
-				device.setActivity((device.getReceiveBytes().doubleValue() + device
-						.getTransmitBytes().doubleValue())
-						/ (period.doubleValue() / 1000));
+				if (port != null) {
+					DeviceStat previous = deviceStats.get(device.getAddress());
+					if (previous == null)
+						previous = new DeviceStat();
+					device.setReceiveBytes(port.getReceiveBytes()
+							- previous.getReceiveBytes());
+					device.setTransmitBytes(port.getTransmitBytes()
+							- previous.getTransmitBytes());
+					device.setPeriod(period);
+					device.setActivity((device.getReceiveBytes().doubleValue() + device
+							.getTransmitBytes().doubleValue())
+							/ (period.doubleValue() / 1000));
 
-				devices.put(device.getAddress(), device);
+					devices.put(device.getAddress(), device);
+				}
 			}
 
 			deviceStats = devices;
@@ -281,32 +282,38 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 
 	@Override
 	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
+		switch (msg.getType()) {
+		case PACKET_IN:
+			// Device activity
+			// Instantiate two objects for OFMatch and OFPacketIn
+			OFPacketIn pin = (OFPacketIn) msg;
+			OFMatch match = new OFMatch();
 
-		// Device activity
-		// Instantiate two objects for OFMatch and OFPacketIn
-		OFPacketIn pin = (OFPacketIn) msg;
-		OFMatch match = new OFMatch();
+			match.loadFromPacket(pin.getPacketData(), pin.getInPort());
 
-		match.loadFromPacket(pin.getPacketData(), pin.getInPort());
+			// Source Ip address for each packet-in to check the most active
+			// host
+			String src = IPv4.fromIPv4Address(match.getNetworkSource());
 
-		// Source Ip address for each packet-in to check the most active host
-		String src = IPv4.fromIPv4Address(match.getNetworkSource());
+			MnHost h = new MnHost();
+			h.setSrc(src);
+			h.setInPort(new Integer(match.getInputPort()));
+			h.setSwitchId(sw.getStringId());
 
-		MnHost h = new MnHost();
-		h.setSrc(src);
-		h.setInPort(new Integer(match.getInputPort()));
-		h.setSwitchId(sw.getStringId());
-
-		// update hosts on port
-		if (!hosts.contains(h)) {
-			for (MnHost m : hosts) {
-				if ((h.getSwitchId().equals(m.getSwitchId()))
-						&& (h.getInPort().equals(m.getInPort()))) {
-					hosts.remove(m);
-					break;
+			// update hosts on port
+			if (!hosts.contains(h)) {
+				for (MnHost m : hosts) {
+					if ((h.getSwitchId().equals(m.getSwitchId()))
+							&& (h.getInPort().equals(m.getInPort()))) {
+						hosts.remove(m);
+						break;
+					}
 				}
+				hosts.add(h);
 			}
-			hosts.add(h);
+			break;
+		default:
+			break;
 		}
 
 		return Command.CONTINUE;
@@ -343,8 +350,7 @@ public class StatCollector implements IFloodlightModule, IOFMessageListener,
 	}
 
 	@Override
-	public void startUp(FloodlightModuleContext context) 
-	{
+	public void startUp(FloodlightModuleContext context) {
 		floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
 		restApi.addRestletRoutable(new StatWebRoutable());
 		deserializer = StatDeserializer.getInstance();
